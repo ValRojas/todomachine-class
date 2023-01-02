@@ -1,0 +1,13 @@
+.ContainerSearch{
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.TodoSearch {
+    height: 30px;
+    width: 300px;
+    border-radius: 10px;
+    border: none;
+    padding: 5px;
+  }

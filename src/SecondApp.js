@@ -1,44 +1,28 @@
+//This is a copy of App.js before creating two components. One component is the complete App and the second works to set Local Storage.
+
+//Use it as guide to understand App.js
+
+
 import React from 'react';
 import {TodoCounter} from './TodoCounter'
 import {TodoItem} from './TodoItem'
-import {TodoForm} from './TodoForm'
 import {TodoList} from './TodoList'
 import {TodoSearch} from './TodoSearch'
 import {CreateTodoButton} from './CreateTodoButton'
-import {Modal} from './modal'
-
-function useLocalStorage (itemName, initialValue){
-
-  const localStorageItem = localStorage.getItem(itemName); //returns TEXT (Array)
-  let parsedItem;
-
-  if(!localStorageItem){ //if empty
-    localStorage.setItem(itemName, JSON.stringify(initialValue)) //empy? then empty TEXT (array)
-    parsedItem = initialValue //empty parsedItem
-  }else{
-    parsedItem = JSON.parse(localStorageItem) // Parse returns array, recieve text
-  }
-
-  const [item, setItem] = React.useState(parsedItem); //sets an array
-
-  const saveItem = (newItem) => {
-    const strinigifiedItem = JSON.stringify(newItem); //recieve array JS, returns *text*
-    localStorage.setItem(itemName,strinigifiedItem);// local storage needs *stringy*, we r saving user information in local
-    setItem(newItem) //state doesnt need stringify, just JS
-  }
-
-  return [
-    item,
-    saveItem,
-  ]
-}
-
 
 function App() {
-  const [todos,saveTodos] = useLocalStorage('TODOS_V1', []) //Todos_V1 was set in my browser, it´s saved there. You will not find it in this code
+  const localStorageToDos = localStorage.getItem('TODOS_V1'); //returns TEXT (Array)
+  let parsedToDos;
 
+  if(!localStorageToDos){ //if empty
+    localStorage.setItem('TODOS_V1', JSON.stringify([])) //empy? empty TEXT (array)
+    parsedToDos = [] //empty parsedToDos
+  }else{
+    parsedToDos = JSON.parse(localStorageToDos) // Parse returns array, recieve text
+  }
+
+  const [todos, setTodos] = React.useState(parsedToDos); //sets an array
   const [searchValue, setSearchValue] = React.useState('');
-  const [openModal, setOpenModal] = React.useState(false);
 
   const completedTodos = todos.filter(todo=>!!todo.completed).length //how many we completed
   const totalTodos = todos.length //total
@@ -55,14 +39,11 @@ function App() {
     })
   }
 
-  const addTodo = (text) => {
-    const newTodos = [...todos];
-    newTodos.push({
-      completed: false,
-      text,
-    });
-    saveTodos(newTodos);
-  };
+  const saveTodos = (newTodos) => {
+    const strinigifiedTodos = JSON.stringify(newTodos); //recieve array JS, returns *text*
+    localStorage.setItem('TODOS_V1',strinigifiedTodos);// local storage needs *stringy*, we r saving user information in local
+    setTodos(newTodos) //state doesnt need stringify, just JS
+  }
 
   const completeTodo = (text) => {
     const todoIndex = todos.findIndex(todo =>todo.text === text); //examino todo para encontrar el que tiene el texto del botón que presiono
@@ -82,6 +63,18 @@ function App() {
     saveTodos(newTodos)
   }
   
+  console.log('render before use effect')
+
+
+{/*TEST*/}
+  React.useEffect(() => { //code to run
+    console.log('use effect aquí')
+  }, [totalTodos]) //when, everytime this thing changes
+{/*TEST*/}
+
+
+  console.log('render after use effect')
+  
   return (
     <React.Fragment>
       <TodoCounter
@@ -95,26 +88,10 @@ function App() {
       <TodoList>
         {searchingTodos.map(todo=>(<TodoItem key={todo.text} text={todo.text} completed={todo.completed} onComplete = {()=> completeTodo(todo.text)} onDelete = {()=> deleteTodo(todo.text)} />))} {/*Sends which task to show*/}
       </TodoList>
-      
-      <CreateTodoButton
-        setOpenModal={setOpenModal}
-        openModal={openModal}
-      />
-
-      {!!openModal && (
-        <Modal>
-        <TodoForm 
-          setOpenModal={setOpenModal}
-          addTodo={addTodo}
-        />
-      </Modal>
-      )}
-
+      <CreateTodoButton/>
     </React.Fragment>
     
   );
 }
 
 export default App;
-
-
